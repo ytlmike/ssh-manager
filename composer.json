@@ -1,0 +1,5 @@
+{
+    "require": {
+        "illuminate/console": "^7.30"
+    }
+}
