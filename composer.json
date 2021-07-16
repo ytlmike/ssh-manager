@@ -1,5 +1,13 @@
 {
     "require": {
         "illuminate/console": "^7.30"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lib\\": "lib/"
+        },
+        "files": [
+            "lib/functions.php"
+        ]
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-include_once 'Row.php';
+namespace Lib;
 
 class Table
 {
