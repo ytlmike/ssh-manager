@@ -1,6 +1,8 @@
 SSH-Manager
 ---
 
+![image](https://github.com/ytlmike/ssh-manager/blob/master/doc/exp.png)
+
 SSH连接管理脚本，支持默认用户、自动输入密码，支持按连接名称、连接标签筛选。
 
 ### 安装

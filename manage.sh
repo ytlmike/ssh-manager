@@ -57,7 +57,7 @@ function error() {
 
 function showTag() {
   hit=$2
-  if [ $hit == $MY_TRUE ]; then
+  if [ "$hit" == $MY_TRUE ]; then
     echo "\033[36m◀\033[0m\033[46;37m $1 \033[0m"
   else
     echo "\033[32m◀\033[0m\033[42;37m $1 \033[0m"
@@ -65,12 +65,8 @@ function showTag() {
 }
 
 function showName() {
-  len=${#1}
-  if [ "0" == "$len" ]; then
-    return 1
-  fi
   hit=$2
-  if [ $hit == $MY_TRUE ]; then
+  if [ "$hit" == $MY_TRUE ]; then
     echo $(selected "◆ $1")
   else
     echo $(light "◆ $1")
@@ -222,7 +218,11 @@ function run() {
         continue
       fi
     fi
-    l="$l$(showName $name $hitName)"
+
+    nameLen=${#name}
+    if [ $nameLen -gt 0 ]; then
+      l="$l$(showName $name $hitName)"
+    fi
 
     #检查要求的标签存在
     for ((k = 0; k < $selectedTagCount; k++)); do
@@ -263,6 +263,11 @@ function run() {
 
     ((i++))
   done <"$LIST_FILE"
+
+  if [ "0" == $showedLines ]; then
+    warn "没有符合条件的连接，请检查参数"
+    return 1
+  fi
 
   echo ""
   ask=""
@@ -326,10 +331,12 @@ fi
 
 if [ ! -f "$CONFIG_FILE" ]; then
   error "未检测到配置文件文件config.ini"
+  exit 1
 fi
 
 if [ ! -f "$LIST_FILE" ]; then
   error "未检测到列表文件list.csv"
+  exit 1
 fi
 
 checkDependency
