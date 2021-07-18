@@ -3,7 +3,9 @@ SSH-Manager
 
 ![image](https://github.com/ytlmike/ssh-manager/blob/master/doc/exp.png)
 
-SSH连接管理脚本，支持默认用户、自动输入密码，支持按连接名称、连接标签筛选。
+SSH连接管理脚本，使用CSV表格管理连接，支持默认用户、自动输入密码，支持按连接名称、连接标签筛选。
+
+在config.ini中可以自定义CSV表格列标题，CSV的各列顺序不用固定
 
 ### 安装
 

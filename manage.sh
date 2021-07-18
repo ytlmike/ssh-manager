@@ -17,12 +17,14 @@ TITLE_PORT=""
 TITLE_USER=""
 TITLE_TAGS=""
 TITLE_NAME=""
+TITLE_PASS=""
 
 POS_HOST=0
 POS_PORT=0
 POS_USER=0
 POS_NAME=0
 POS_TAGS=0
+POS_PASS=0
 
 usage() {
   echo "Usage:"
@@ -131,6 +133,10 @@ function readConfig() {
       TITLE_NAME=${arr[1]}
       mustNotEmpty ${arr[1]} "缺少用户名字段标题配置"
       ;;
+    "TITLE_PASS")
+      TITLE_PASS=${arr[1]}
+      mustNotEmpty ${arr[1]} "缺少密码字段标题配置"
+      ;;
     esac
   done <"$CONFIG_FILE"
 }
@@ -149,6 +155,7 @@ function locateRows() {
     $TITLE_USER) POS_USER=$i ;;
     $TITLE_NAME) POS_NAME=$i ;;
     $TITLE_TAGS) POS_TAGS=$i ;;
+    $TITLE_PASS) POS_PASS=$i ;;
     *)
       error "无效的csv标题：$title"
       exit 1
@@ -180,6 +187,7 @@ function run() {
   lastHost=""
   lastPort=""
   lastUser=""
+  lastPass=""
   while read line; do
     OLD_IFS="$IFS"
     IFS=","
@@ -195,6 +203,7 @@ function run() {
     port=$(trim ${arr[$POS_PORT]})
     name=$(trim ${arr[$POS_NAME]})
     user=$(trim ${arr[$POS_USER]})
+    pass=$(trim ${arr[$POS_PASS]})
 
     IFS="|"
     tagArr=($tags)
@@ -203,6 +212,11 @@ function run() {
     userLen=${#user}
     if [ "0" == $userLen ]; then
       user=$defaultUser
+    fi
+
+    passLen=${#pass}
+    if [ "0" == $passLen ]; then
+      pass=$PASSWORD
     fi
 
     portLen=${#port}
@@ -258,6 +272,7 @@ function run() {
       lastUser=$user
       lastHost=$host
       lastPort=$port
+      lastPass=$pass
       selectSuccess=$MY_TRUE
       break
     fi
@@ -265,6 +280,10 @@ function run() {
     if [ $MY_TRUE != $selected ]; then
       echo ""
       echo -e $l
+      lastUser=$user
+      lastHost=$host
+      lastPort=$port
+      lastPass=$pass
       ((showedLines++))
     fi
 
@@ -272,7 +291,7 @@ function run() {
   done <"$LIST_FILE"
 
   if [ $MY_TRUE == $selectSuccess ]; then
-    startConnect $lastUser $lastHost $lastPort $PASSWORD
+    startConnect $lastUser $lastHost $lastPort $lastPass
     exit 0
   fi
 
