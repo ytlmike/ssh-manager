@@ -1,5 +1,4 @@
 list.csv
-.env
+config.ini
 .idea/
 .DS_Store
-vendor/
