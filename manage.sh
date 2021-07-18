@@ -176,6 +176,10 @@ function run() {
 
   i=0
   showedLines=0
+  selectSuccess=$MY_FALSE
+  lastHost=""
+  lastPort=""
+  lastUser=""
   while read line; do
     OLD_IFS="$IFS"
     IFS=","
@@ -212,7 +216,7 @@ function run() {
     #检查限制的名称
     hitName=$MY_FALSE
     if [ "0" != "$selectedNameLen" ]; then
-      if [ $REQUIRED_NAME == $name ]; then
+      if [ $REQUIRED_NAME == "$name" ]; then
         hitName=$MY_TRUE
       else
         continue
@@ -251,8 +255,11 @@ function run() {
     done
 
     if [ "$i" == "$selectedNum" ]; then
-      startConnect $user $host $port $PASSWORD
-      return 0
+      lastUser=$user
+      lastHost=$host
+      lastPort=$port
+      selectSuccess=$MY_TRUE
+      break
     fi
 
     if [ $MY_TRUE != $selected ]; then
@@ -264,6 +271,11 @@ function run() {
     ((i++))
   done <"$LIST_FILE"
 
+  if [ $MY_TRUE == $selectSuccess ]; then
+    startConnect $lastUser $lastHost $lastPort $PASSWORD
+    exit 0
+  fi
+
   if [ "0" == $showedLines ]; then
     warn "没有符合条件的连接，请检查参数"
     return 1
@@ -274,11 +286,11 @@ function run() {
   if [ $MY_TRUE == $selected ]; then
     ask="输入无效，请重新输入:"
   else
-    ask="请输入要连接的服务器序号:"
     if [ "1" == $showedLines ]; then
-      startConnect $user $host $port $PASSWORD
-      return 0
+      startConnect $lastUser $lastHost $lastPort $PASSWORD
+      exit 0
     fi
+    ask="请输入要连接的服务器序号:"
   fi
   info $ask
   read -p " > " selectedNum
@@ -291,14 +303,13 @@ function startConnect() {
   host=$2
   port=$3
   pass=$4
-  cmd="sshpass"
   pwLen=${#pass}
-  if [ $pwLen -gt 0 ]; then
-    cmd="$cmd -p $pass"
-  fi
-  cmd="$cmd ssh -o StrictHostKeyChecking=no $user@$host -p $port"
   info "正在连接：$user@$host:$port"
-  bash -c $cmd
+  if [ $pwLen -gt 0 ]; then
+    sshpass -p $pass ssh -tt -o StrictHostKeyChecking=no $user@$host -p $port
+  else
+    sshpass ssh -tt -o StrictHostKeyChecking=no $user@$host -p $port
+  fi
 }
 
 #解析参数
