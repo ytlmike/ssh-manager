@@ -46,7 +46,7 @@ function strDisplayLen() {
 }
 
 function trim() {
-  echo $1 | grep -o "[^ ]\+\( \+[^ ]\+\)*"
+  echo $1
 }
 
 function info() {
@@ -237,6 +237,7 @@ function run() {
   lastPort=""
   lastUser=""
   lastPass=""
+  display=""
   while read line; do
     OLD_IFS="$IFS"
     IFS=","
@@ -327,8 +328,7 @@ function run() {
     fi
 
     if [ $MY_TRUE != $selected ]; then
-      echo ""
-      echo -e $l
+      display="$display \n$l\n"
       lastUser=$user
       lastHost=$host
       lastPort=$port
@@ -338,6 +338,8 @@ function run() {
 
     ((i++))
   done <"$LIST_FILE"
+
+  echo -e $display
 
   if [ $MY_TRUE == $selectSuccess ]; then
     startConnect $lastUser $lastHost $lastPort $lastPass
