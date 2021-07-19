@@ -7,8 +7,8 @@ MY_FALSE="0"
 
 REQUIRED_NAME=""
 REQUIRED_TAGS=""
-LIST_FILE="$ROOT_PATH/list.csv"
-CONFIG_FILE="$ROOT_PATH/config.ini"
+LIST_FILE=""
+CONFIG_FILE=""
 
 DEFAULT_USER=""
 PASSWORD=""
@@ -84,18 +84,37 @@ function mustNotEmpty() {
 }
 
 function checkDependency() {
-  hash sshpass >/dev/null 2>&1
-  if [ "$?" != "0" ]; then
-
+  if ! hash sshpass >/dev/null 2>&1; then
+    echo "缺少sshpass，正在安装..."
+    echo "wget https://ytlmike-public.oss-cn-beijing.aliyuncs.com/sshpass-1.08.tar.gz"
     wget https://ytlmike-public.oss-cn-beijing.aliyuncs.com/sshpass-1.08.tar.gz
+    echo "tar -xvf sshpass-1.08.tar.gz"
     tar -xvf sshpass-1.08.tar.gz
-    cd sshpass-1.08
+    echo "cd sshpass-1.08"
+    cd sshpass-1.08 || exit
+    echo "./configure"
     ./configure
+    echo "make"
     make
+    echo "sudo make install"
     sudo make install
+    echo "cd .."
     cd ..
+    echo "rm -rf sshpass-1.08"
     rm -rf sshpass-1.08
+    echo "rm sshpass-1.08.tar.gz"
     rm sshpass-1.08.tar.gz
+  fi
+  if [ "$(uname)" == "Darwin" ]; then
+    if ! hash greadlink >/dev/null 2>&1; then
+      echo "缺少greadlink，正在安装..."
+      if ! hash brew >/dev/null 2>&1; then
+        echo "缺少homebrew，请手动安装：https://docs.brew.sh/Installation"
+        exit 1
+      fi
+      echo "brew install coreutils"
+      brew install coreutils
+    fi
   fi
 }
 
@@ -353,6 +372,22 @@ while getopts "t:n:c:l:" arg; do
   esac
 done
 
+checkDependency
+
+if [ "$(uname)" == "Darwin" ]; then
+  script=$(greadlink -f "$0")
+else
+  script=$(readlink -f "$0")
+fi
+ROOT_PATH=$(dirname "$script")
+
+if [ ${#LIST_FILE} -eq 0 ]; then
+    LIST_FILE="$ROOT_PATH/list.csv"
+fi
+if [ ${#CONFIG_FILE} -eq 0 ]; then
+    CONFIG_FILE="$ROOT_PATH/config.ini"
+fi
+
 arg0=$1
 word0=${arg0:0:1}
 if [ "-" != "$word0" ]; then
@@ -369,7 +404,12 @@ if [ ! -f "$LIST_FILE" ]; then
   exit 1
 fi
 
-checkDependency
+if [ "$(uname)" == "Darwin" ]; then
+  sed -i "" 's/\r//' $LIST_FILE
+else
+  sed -i 's/\r//' $LIST_FILE
+fi
+
 readConfig
 locateRows
 run
