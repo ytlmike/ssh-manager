@@ -26,6 +26,8 @@ POS_NAME=0
 POS_TAGS=0
 POS_PASS=0
 
+TMP_FILE="/tmp/ssh-manager-list.csv"
+
 usage() {
   echo "Usage:"
   echo "$0 [NAME]"
@@ -34,15 +36,15 @@ usage() {
 
 #计算字符串的显示长度
 function strDisplayLen() {
-    charCount=${#1}
-    bytes=0
-    if [ "$(uname)" == "Darwin" ]; then
-      bytes=$(echo $1 | awk '{print length($0)}')
-    else
-      bytes=$(expr length $1)
-    fi
-    (( displayLen=($bytes-$charCount)/2 + $charCount ))
-    echo $displayLen
+  charCount=${#1}
+  bytes=0
+  if [ "$(uname)" == "Darwin" ]; then
+    bytes=$(echo $1 | awk '{print length($0)}')
+  else
+    bytes=$(expr length $1)
+  fi
+  ((displayLen = ($bytes - $charCount) / 2 + $charCount))
+  echo $displayLen
 }
 
 function trim() {
@@ -64,7 +66,7 @@ function selected() {
 function warn() {
   l=$(strDisplayLen $1)
   s=""
-  for (( i = 0; i < l; i++ )); do
+  for ((i = 0; i < l; i++)); do
     s="$s "
   done
   echo -e "\033[43;37m $s \033[0m"
@@ -75,7 +77,7 @@ function warn() {
 function error() {
   l=$(strDisplayLen $1)
   s=""
-  for (( i = 0; i < l; i++ )); do
+  for ((i = 0; i < l; i++)); do
     s="$s "
   done
   echo -e "\033[41;37m $s \033[0m"
@@ -112,7 +114,7 @@ function mustNotEmpty() {
 function checkDependency() {
   if ! hash wget >/dev/null 2>&1; then
     error "缺少wget，请自行安装"
-    exit 1;
+    exit 1
   fi
   if ! hash sshpass >/dev/null 2>&1; then
     info "缺少sshpass，正在安装..."
@@ -197,8 +199,7 @@ function locateRows() {
   arr=($first)
   len=${#arr[*]}
   for ((i = 0; i < len; i++)); do
-    title=$(trim ${arr[$i]})
-    case $title in
+    case ${arr[$i]} in
     $TITLE_HOST) POS_HOST=$i ;;
     $TITLE_PORT) POS_PORT=$i ;;
     $TITLE_USER) POS_USER=$i ;;
@@ -248,12 +249,12 @@ function run() {
       continue
     fi
 
-    tags=$(trim ${arr[$POS_TAGS]})
-    host=$(trim ${arr[$POS_HOST]})
-    port=$(trim ${arr[$POS_PORT]})
-    name=$(trim ${arr[$POS_NAME]})
-    user=$(trim ${arr[$POS_USER]})
-    pass=$(trim ${arr[$POS_PASS]})
+    tags=${arr[$POS_TAGS]}
+    host=${arr[$POS_HOST]}
+    port=${arr[$POS_PORT]}
+    name=${arr[$POS_NAME]}
+    user=${arr[$POS_USER]}
+    pass=${arr[$POS_PASS]}
 
     IFS="|"
     tagArr=($tags)
@@ -337,7 +338,7 @@ function run() {
     fi
 
     ((i++))
-  done <"$LIST_FILE"
+  done <"$TMP_FILE"
 
   echo -e $display
 
@@ -413,10 +414,10 @@ fi
 ROOT_PATH=$(dirname "$script")
 
 if [ ${#LIST_FILE} -eq 0 ]; then
-    LIST_FILE="$ROOT_PATH/list.csv"
+  LIST_FILE="$ROOT_PATH/list.csv"
 fi
 if [ ${#CONFIG_FILE} -eq 0 ]; then
-    CONFIG_FILE="$ROOT_PATH/config.ini"
+  CONFIG_FILE="$ROOT_PATH/config.ini"
 fi
 
 arg0=$1
@@ -435,12 +436,7 @@ if [ ! -f "$LIST_FILE" ]; then
   exit 1
 fi
 
-#mac里面的sed命令语法有不同
-if [ "$(uname)" == "Darwin" ]; then
-  sed -i "" 's/\r//' $LIST_FILE
-else
-  sed -i 's/\r//' $LIST_FILE
-fi
+awk '{ gsub(/,[ ]+/,","); print $0 }' $LIST_FILE | awk '{ gsub(/\r/,""); print $0 }' >$TMP_FILE
 
 readConfig
 locateRows
