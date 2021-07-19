@@ -32,7 +32,15 @@ usage() {
   echo "$0 [-c CONFIG_FILE_PATH] [-l LIST_FILE_PATH] [-t TAG1,TAG2][-n NAME]]"
 }
 
-trim() {
+#计算字符串的显示长度
+function strDisplayLen() {
+    charCount=${#1}
+    bytes=$(echo $1 | awk '{print length($0)}')
+    (( displayLen=($bytes-$charCount)/2 + $charCount ))
+    echo $displayLen
+}
+
+function trim() {
   echo $1 | grep -o "[^ ]\+\( \+[^ ]\+\)*"
 }
 
@@ -49,12 +57,25 @@ function selected() {
 }
 
 function warn() {
-  echo ""
+  l=$(strDisplayLen $1)
+  s=""
+  for (( i = 0; i < l; i++ )); do
+    s="$s "
+  done
+  echo -e "\033[43;37m $s \033[0m"
   echo -e "\033[43;37m $1 \033[0m"
+  echo -e "\033[43;37m $s \033[0m"
 }
 
 function error() {
-  echo -e "\033[41;37m\n\n $1 \n\033[0m"
+  l=$(strDisplayLen $1)
+  s=""
+  for (( i = 0; i < l; i++ )); do
+    s="$s "
+  done
+  echo -e "\033[41;37m $s \033[0m"
+  echo -e "\033[41;37m $1 \033[0m"
+  echo -e "\033[41;37m $s \033[0m"
 }
 
 function showTag() {
@@ -86,6 +107,7 @@ function mustNotEmpty() {
 function checkDependency() {
   if ! hash wget >/dev/null 2>&1; then
     error "缺少wget，请自行安装"
+    exit 1;
   fi
   if ! hash sshpass >/dev/null 2>&1; then
     info "缺少sshpass，正在安装..."
