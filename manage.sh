@@ -84,25 +84,28 @@ function mustNotEmpty() {
 }
 
 function checkDependency() {
+  if ! hash wget >/dev/null 2>&1; then
+    error "缺少wget，请自行安装"
+  fi
   if ! hash sshpass >/dev/null 2>&1; then
-    echo "缺少sshpass，正在安装..."
-    echo "wget https://ytlmike-public.oss-cn-beijing.aliyuncs.com/sshpass-1.08.tar.gz"
+    info "缺少sshpass，正在安装..."
+    info "wget https://ytlmike-public.oss-cn-beijing.aliyuncs.com/sshpass-1.08.tar.gz"
     wget https://ytlmike-public.oss-cn-beijing.aliyuncs.com/sshpass-1.08.tar.gz
-    echo "tar -xvf sshpass-1.08.tar.gz"
+    info "tar -xvf sshpass-1.08.tar.gz"
     tar -xvf sshpass-1.08.tar.gz
-    echo "cd sshpass-1.08"
+    info "cd sshpass-1.08"
     cd sshpass-1.08 || exit
-    echo "./configure"
+    info "./configure"
     ./configure
-    echo "make"
+    info "make"
     make
-    echo "sudo make install"
+    info "sudo make install"
     sudo make install
-    echo "cd .."
+    info "cd .."
     cd ..
-    echo "rm -rf sshpass-1.08"
+    info "rm -rf sshpass-1.08"
     rm -rf sshpass-1.08
-    echo "rm sshpass-1.08.tar.gz"
+    info "rm sshpass-1.08.tar.gz"
     rm sshpass-1.08.tar.gz
   fi
   if [ "$(uname)" == "Darwin" ]; then
@@ -404,6 +407,7 @@ if [ ! -f "$LIST_FILE" ]; then
   exit 1
 fi
 
+#mac里面的sed命令语法有不同
 if [ "$(uname)" == "Darwin" ]; then
   sed -i "" 's/\r//' $LIST_FILE
 else
