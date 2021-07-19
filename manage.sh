@@ -35,7 +35,12 @@ usage() {
 #计算字符串的显示长度
 function strDisplayLen() {
     charCount=${#1}
-    bytes=$(echo $1 | awk '{print length($0)}')
+    bytes=0
+    if [ "$(uname)" == "Darwin" ]; then
+      bytes=$(echo $1 | awk '{print length($0)}')
+    else
+      bytes=$(expr length $1)
+    fi
     (( displayLen=($bytes-$charCount)/2 + $charCount ))
     echo $displayLen
 }
@@ -357,7 +362,6 @@ function run() {
   fi
   info $ask
   read -p " > " selectedNum
-  echo "选择的序号：$selectedNum"
   run "$selectedNum"
 }
 
