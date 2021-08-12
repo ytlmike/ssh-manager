@@ -206,10 +206,6 @@ function locateRows() {
     $TITLE_NAME) POS_NAME=$i ;;
     $TITLE_TAGS) POS_TAGS=$i ;;
     $TITLE_PASS) POS_PASS=$i ;;
-    *)
-      error "无效的csv标题：$title"
-      exit 1
-      ;;
     esac
   done
 }
