@@ -193,7 +193,7 @@ function readConfig() {
 }
 
 function locateRows() {
-  first=$(head -1 $LIST_FILE)
+  first=$(head -1 $TMP_FILE)
   OLD_IFS="$IFS"
   IFS=","
   arr=($first)
