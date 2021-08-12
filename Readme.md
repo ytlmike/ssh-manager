@@ -10,8 +10,8 @@ SSH连接管理脚本，使用CSV表格管理连接，支持默认用户、自�
 ### 安装
 
 1. 克隆项目
-2. 按config.ini.example模板创建你的配置文件，注意结尾要有空行
-3. 按list.csv.example模板创建你的连接列表文件，注意结尾要有空行
+2. 按config.ini.example模板创建你的配置文件
+3. 按list.csv.example模板创建你的连接列表文件
 4. enjoy
 
 ### 使用

@@ -27,6 +27,7 @@ POS_TAGS=0
 POS_PASS=0
 
 TMP_FILE="/tmp/ssh-manager-list.csv"
+TMP_CONFIG="/tmp/ssh-manager-config.ini"
 
 usage() {
   echo "Usage:"
@@ -189,7 +190,7 @@ function readConfig() {
       mustNotEmpty ${arr[1]} "缺少密码字段标题配置"
       ;;
     esac
-  done <"$CONFIG_FILE"
+  done <"$TMP_CONFIG"
 }
 
 function locateRows() {
@@ -236,6 +237,10 @@ function run() {
   lastPass=""
   display=""
   while read line; do
+    if [ "$line" == "" ]; then
+        continue
+    fi
+
     OLD_IFS="$IFS"
     IFS=","
     arr=($line)
@@ -432,7 +437,8 @@ if [ ! -f "$LIST_FILE" ]; then
   exit 1
 fi
 
-awk '{ gsub(/,[ ]+/,","); print $0 }' $LIST_FILE | awk '{ gsub(/\r/,""); print $0 }' >$TMP_FILE
+awk '{ gsub(/,[ ]+/,","); print $0 }' $LIST_FILE | awk '{ gsub(/\r/,""); print $0 }' > $TMP_FILE
+awk '{ gsub(/\r/,""); print $0 }' $CONFIG_FILE > $TMP_CONFIG
 
 readConfig
 locateRows
