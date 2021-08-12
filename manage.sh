@@ -341,7 +341,7 @@ function run() {
     ((i++))
   done <"$TMP_FILE"
 
-  echo -e $display
+  echo -en $display
 
   if [ $MY_TRUE == $selectSuccess ]; then
     startConnect $lastUser $lastHost $lastPort $lastPass
@@ -376,6 +376,7 @@ function startConnect() {
   pass=$4
   pwLen=${#pass}
   info "正在连接：$user@$host:$port"
+  echo ""
   if [ $pwLen -gt 0 ]; then
     sshpass -p $pass ssh -tt -o StrictHostKeyChecking=no $user@$host -p $port
   else
