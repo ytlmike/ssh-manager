@@ -3,7 +3,7 @@ USERNAME=foo
 PASSWORD=
 
 # 跳板机列表，下划线后面为跳板名
-JUMP_j1=yourname@host:port
+JUMP:j1=yourname@host:port
 
 # CSV文件标题对应关系
 TITLE_HOST=主机

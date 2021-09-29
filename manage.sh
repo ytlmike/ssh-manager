@@ -1,9 +1,10 @@
-#!/bin/bash
+#!bash
 
 ROOT_PATH=$(pwd)
 
 MY_TRUE="1"
 MY_FALSE="0"
+JUMP_PREFIX="JUMP:"
 
 REQUIRED_NAME=""
 REQUIRED_TAGS=""
@@ -199,8 +200,8 @@ function readConfig() {
     esac
 
     headStr=${line:0:5}
-    if [ "${headStr}" == "JUMP_" ]; then
-        JUMP_DICT["${arr[0]}"]=${arr[1]}
+    if [ "${headStr}" == "${JUMP_PREFIX}" ]; then
+        JUMP_DICT[${#JUMP_DICT[*]}]=${line}
     fi
 
   done <"$TMP_CONFIG"
@@ -272,8 +273,21 @@ function run() {
     user=${arr[$POS_USER]}
     pass=${arr[$POS_PASS]}
 
+    jump=""
     jumpName=${arr[$POS_JUMP]}
-    jump=${JUMP_DICT[${jumpName}]}
+    nameLen=${#jumpName}
+    if [ $nameLen -gt 0 ]; then
+      preLen=${#JUMP_PREFIX}
+      ((preLen=preLen+nameLen+1))
+      for item in ${JUMP_DICT[@]}
+      do
+        if [ "${JUMP_PREFIX}${jumpName}=" == "${item:0:${preLen}}" ]; then
+            totalLen=${#item}
+            ((remindsLen=totalLen-preLen))
+            jump=${item:${preLen}:${remindsLen}}
+        fi
+      done
+    fi
 
     IFS="|"
     tagArr=($tags)
@@ -338,6 +352,7 @@ function run() {
       l="$l $(showTag ${tagArr[j]} $hit)"
     done
 
+    # 如果当前序号是指定的序号，跳出循环
     if [ "$i" == "$selectedNum" ]; then
       lastUser=$user
       lastHost=$host
@@ -398,6 +413,9 @@ function startConnect() {
   pwLen=${#pass}
   jumpLen=${#jump}
   info "正在连接：$user@$host:$port"
+  if [  $jumpLen -gt 0  ]; then
+    info "使用跳板: $jump"
+  fi
   echo ""
   if [ $pwLen -gt 0 ]; then
     if [  $jumpLen -gt 0  ]; then
