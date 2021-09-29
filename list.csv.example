@@ -1,4 +1,4 @@
-主机, 端口, 连接名, 用户名, 标签, 密码
-10.1.2.3, 22, myserver,, tag1|tag2
+主机, 端口, 连接名, 用户名, 标签, 密码, 跳板
+10.1.2.3, 22, myserver,, tag1|tag2, 111111,j1
 10.1.2.4, 333, myserver2, root,tag3|tag4
 10.1.2.4, , myserver3,,tag5|tag6

@@ -18,6 +18,7 @@ TITLE_USER=""
 TITLE_TAGS=""
 TITLE_NAME=""
 TITLE_PASS=""
+TITLE_JUMP=""
 
 POS_HOST=0
 POS_PORT=0
@@ -25,6 +26,9 @@ POS_USER=0
 POS_NAME=0
 POS_TAGS=0
 POS_PASS=0
+POS_JUMP=0
+
+declare -a JUMP_DICT
 
 TMP_FILE="/tmp/ssh-manager-list.csv"
 TMP_CONFIG="/tmp/ssh-manager-config.ini"
@@ -189,7 +193,16 @@ function readConfig() {
       TITLE_PASS=${arr[1]}
       mustNotEmpty ${arr[1]} "缺少密码字段标题配置"
       ;;
+    "TITLE_JUMP")
+      TITLE_JUMP=${arr[1]}
+      ;;
     esac
+
+    headStr=${line:0:5}
+    if [ "${headStr}" == "JUMP_" ]; then
+        JUMP_DICT["${arr[0]}"]=${arr[1]}
+    fi
+
   done <"$TMP_CONFIG"
 }
 
@@ -207,6 +220,7 @@ function locateRows() {
     $TITLE_NAME) POS_NAME=$i ;;
     $TITLE_TAGS) POS_TAGS=$i ;;
     $TITLE_PASS) POS_PASS=$i ;;
+    $TITLE_JUMP) POS_JUMP=$i ;;
     esac
   done
 }
@@ -235,6 +249,7 @@ function run() {
   lastPort=""
   lastUser=""
   lastPass=""
+  lastJump=""
   display=""
   while read line; do
     if [ "$line" == "" ]; then
@@ -256,6 +271,9 @@ function run() {
     name=${arr[$POS_NAME]}
     user=${arr[$POS_USER]}
     pass=${arr[$POS_PASS]}
+
+    jumpName=${arr[$POS_JUMP]}
+    jump=${JUMP_DICT[${jumpName}]}
 
     IFS="|"
     tagArr=($tags)
@@ -325,6 +343,7 @@ function run() {
       lastHost=$host
       lastPort=$port
       lastPass=$pass
+      lastJump=$jump
       selectSuccess=$MY_TRUE
       break
     fi
@@ -335,6 +354,7 @@ function run() {
       lastHost=$host
       lastPort=$port
       lastPass=$pass
+      lastJump=$jump
       ((showedLines++))
     fi
 
@@ -344,7 +364,7 @@ function run() {
   echo -en $display
 
   if [ $MY_TRUE == $selectSuccess ]; then
-    startConnect $lastUser $lastHost $lastPort $lastPass
+    startConnect $lastUser $lastHost $lastPort $lastPass $lastJump
     exit 0
   fi
 
@@ -359,7 +379,7 @@ function run() {
     ask="输入无效，请重新输入:"
   else
     if [ "1" == $showedLines ]; then
-      startConnect $lastUser $lastHost $lastPort $PASSWORD
+      startConnect $lastUser $lastHost $lastPort $PASSWORD $lastJump
       exit 0
     fi
     ask="请输入要连接的服务器序号:"
@@ -374,13 +394,23 @@ function startConnect() {
   host=$2
   port=$3
   pass=$4
+  jump=$5
   pwLen=${#pass}
+  jumpLen=${#jump}
   info "正在连接：$user@$host:$port"
   echo ""
   if [ $pwLen -gt 0 ]; then
-    sshpass -p $pass ssh -tt -o StrictHostKeyChecking=no $user@$host -p $port
+    if [  $jumpLen -gt 0  ]; then
+      sshpass -p $pass ssh -tt -o StrictHostKeyChecking=no $user@$host -p $port -J $jump
+    else
+      sshpass -p $pass ssh -tt -o StrictHostKeyChecking=no $user@$host -p $port
+    fi
   else
-    sshpass ssh -tt -o StrictHostKeyChecking=no $user@$host -p $port
+    if [  $jumpLen -gt 0  ]; then
+      sshpass ssh -tt -o StrictHostKeyChecking=no $user@$host -p $port -J $jump
+    else
+      sshpass ssh -tt -o StrictHostKeyChecking=no $user@$host -p $port
+    fi
   fi
 }
 
