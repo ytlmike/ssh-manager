@@ -124,8 +124,8 @@ function checkDependency() {
   fi
   if ! hash sshpass >/dev/null 2>&1; then
     info "缺少sshpass，正在安装..."
-    info "wget https://ytlmike-pub.oss-cn-beijing.aliyuncs.com/sshpass-1.08.tar.gz"
-    wget https://ytlmike-pub.oss-cn-beijing.aliyuncs.com/sshpass-1.08.tar.gz
+    info "wget https://downloads.sourceforge.net/project/sshpass/sshpass/1.08/sshpass-1.08.tar.gz"
+    wget https://downloads.sourceforge.net/project/sshpass/sshpass/1.08/sshpass-1.08.tar.gz
     info "tar -xvf sshpass-1.08.tar.gz"
     tar -xvf sshpass-1.08.tar.gz
     info "cd sshpass-1.08"
